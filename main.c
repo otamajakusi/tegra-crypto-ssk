@@ -87,7 +87,7 @@ static void dump(const char *s, int size, int newline)
     printf("%02x", s[i]);
     if (newline) {
       if (((i + 1) % 16) == 0) {
-        printf(stderr, "\n");
+        printf("\n");
       }
     }
   }
@@ -106,13 +106,15 @@ static int to_hex(int c) {
   return -1;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
   unsigned char in[16] = {0};
   unsigned char out[16] = {0};
   unsigned char iv[16] = {0};
   if (argc > 1) {
     const char *p = argv[1];
-    for (int i = 0; i < sizeof(in); i ++) {
+    for (int i = 0;
+      i < sizeof(in) && p[i * 2] != '\0' && p[i * 2 + 1] != '\0';
+      i ++) {
       int h = to_hex(p[i * 2]) & 0x7;
       int l = to_hex(p[i * 2 + 1]) & 0x7;
       if (h < 0 || l < 0) {
@@ -124,7 +126,7 @@ int main() {
   }
   //dump(in, sizeof(in));
   //dump(out, sizeof(out));
-  tegra_crypto_op(in, out, sizeof(in), iv, sizeof(iv), 0, TEGRA_CRYPTO_ECB, 0);
+  tegra_crypto_op(in, out, sizeof(in), iv, sizeof(iv), 1, TEGRA_CRYPTO_ECB, 1);
   dump(out, sizeof(out), 0);
   return EXIT_SUCCESS;
 }
