@@ -81,23 +81,50 @@ void tegra_crypto_op_close(void)
 	}
 }
 
-void dump(const char *s, int size)
+static void dump(const char *s, int size, int newline)
 {
   for (int i = 0; i < size; i ++) {
-    fprintf(stderr, "%02x", s[i]);
-    if (((i + 1) % 16) == 0) {
-      fprintf(stderr, "\n");
+    printf("%02x", s[i]);
+    if (newline) {
+      if (((i + 1) % 16) == 0) {
+        printf(stderr, "\n");
+      }
     }
   }
+}
+
+static int to_hex(int c) {
+  if (c >= '0' && c <= '9') {
+    return c - '0';
+  }
+  if (c >= 'a' && c <= 'f') {
+    return c - 'a' + 10;
+  }
+  if (c >= 'A' && c <= 'F') {
+    return c - 'A' + 10;
+  }
+  return -1;
 }
 
 int main() {
   unsigned char in[16] = {0};
   unsigned char out[16] = {0};
   unsigned char iv[16] = {0};
+  if (argc > 1) {
+    const char *p = argv[1];
+    for (int i = 0; i < sizeof(in); i ++) {
+      int h = to_hex(p[i * 2]) & 0x7;
+      int l = to_hex(p[i * 2 + 1]) & 0x7;
+      if (h < 0 || l < 0) {
+        fprintf(stderr, "input is invalid\n");
+        return 1;
+      }
+      in[i] = ((h << 4) | l);
+    }
+  }
   //dump(in, sizeof(in));
   //dump(out, sizeof(out));
   tegra_crypto_op(in, out, sizeof(in), iv, sizeof(iv), 0, TEGRA_CRYPTO_ECB, 0);
-  dump(out, sizeof(out));
+  dump(out, sizeof(out), 0);
   return EXIT_SUCCESS;
 }
