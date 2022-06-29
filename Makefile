@@ -10,4 +10,4 @@ tegra-crypt-ssk: $(OBJ)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -rf $(OBJ) crypt
+	rm -rf $(OBJ) tegra-crypt-ssk
