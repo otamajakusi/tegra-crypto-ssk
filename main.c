@@ -110,13 +110,14 @@ int main(int argc, char *argv[]) {
   unsigned char in[16] = {0};
   unsigned char out[16] = {0};
   unsigned char iv[16] = {0};
-  if (argc > 1) {
+  int enc = 1;
+  if (argc >= 2) {
     const char *p = argv[1];
     for (int i = 0;
       i < sizeof(in) && p[i * 2] != '\0' && p[i * 2 + 1] != '\0';
       i ++) {
-      int h = to_hex(p[i * 2]) & 0x7;
-      int l = to_hex(p[i * 2 + 1]) & 0x7;
+      int h = to_hex(p[i * 2]) & 0xf;
+      int l = to_hex(p[i * 2 + 1]) & 0xf;
       if (h < 0 || l < 0) {
         fprintf(stderr, "input is invalid\n");
         return 1;
@@ -124,9 +125,15 @@ int main(int argc, char *argv[]) {
       in[i] = ((h << 4) | l);
     }
   }
-  //dump(in, sizeof(in));
-  //dump(out, sizeof(out));
-  tegra_crypto_op(in, out, sizeof(in), iv, sizeof(iv), 1, TEGRA_CRYPTO_ECB, 1);
+  if (argc == 3) {
+    const char *p = argv[2];
+    if (*p == '0') {
+      enc = 0;
+    }
+  }
+  //dump(in, sizeof(in), 1);
+  //dump(out, sizeof(out), 1);
+  tegra_crypto_op(in, out, sizeof(in), iv, sizeof(iv), enc, TEGRA_CRYPTO_ECB, 1);
   dump(out, sizeof(out), 0);
   return EXIT_SUCCESS;
 }
